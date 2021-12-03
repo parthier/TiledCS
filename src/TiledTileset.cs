@@ -206,14 +206,10 @@ namespace TiledCS
                 tile.properties = ParseProperties(nodesProperty);
                 tile.animation = ParseAnimations(nodesAnimation);
 
-
                 if (nodeObjectGroup != null)
                 {
-                    
-                    
-                        var nodeObjects = nodeObjectGroup.SelectNodes("object");
-                        tile.objects = ParseObjects(nodeObjects);
-                    
+                    var nodeObjects = nodeObjectGroup.SelectNodes("object");
+                    tile.objects = ParseObjects(nodeObjects);
                 }
 
                 if (nodeImage != null)
