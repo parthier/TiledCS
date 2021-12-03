@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Xml;
 
@@ -196,6 +197,7 @@ namespace TiledCS
                 var nodesProperty = node.SelectNodes("properties/property");
                 var nodesAnimation = node.SelectNodes("animation/frame");
                 var nodeImage = node.SelectSingleNode("image");
+                var nodeObjectGroup = node.SelectSingleNode("objectgroup");
 
                 var tile = new TiledTile();
                 tile.id = int.Parse(node.Attributes["id"].Value);
@@ -203,6 +205,16 @@ namespace TiledCS
                 tile.terrain = node.Attributes["terrain"]?.Value.Split(',').AsIntArray();
                 tile.properties = ParseProperties(nodesProperty);
                 tile.animation = ParseAnimations(nodesAnimation);
+
+
+                if (nodeObjectGroup != null)
+                {
+                    
+                    
+                        var nodeObjects = nodeObjectGroup.SelectNodes("object");
+                        tile.objects = ParseObjects(nodeObjects);
+                    
+                }
 
                 if (nodeImage != null)
                 {
@@ -231,6 +243,78 @@ namespace TiledCS
                 terrain.tile = int.Parse(node.Attributes["tile"].Value);
 
                 result.Add(terrain);
+            }
+
+            return result.ToArray();
+        }
+
+        private TiledObject[] ParseObjects(XmlNodeList nodeList)
+        {
+            var result = new List<TiledObject>();
+
+            foreach (XmlNode node in nodeList)
+            {
+                var nodesProperty = node.SelectNodes("properties/property");
+                var nodePolygon = node.SelectSingleNode("polygon");
+                var nodePoint = node.SelectSingleNode("point");
+                var nodeEllipse = node.SelectSingleNode("ellipse");
+
+                var obj = new TiledObject();
+                obj.id = int.Parse(node.Attributes["id"].Value);
+                obj.name = node.Attributes["name"]?.Value;
+                obj.type = node.Attributes["type"]?.Value;
+                obj.gid = int.Parse(node.Attributes["gid"]?.Value ?? "0");
+                obj.x = float.Parse(node.Attributes["x"].Value, CultureInfo.InvariantCulture);
+                obj.y = float.Parse(node.Attributes["y"].Value, CultureInfo.InvariantCulture);
+
+                if (nodesProperty != null)
+                {
+                    obj.properties = ParseProperties(nodesProperty);
+                }
+
+                if (nodePolygon != null)
+                {
+                    var points = nodePolygon.Attributes["points"].Value;
+                    var vertices = points.Split(' ');
+
+                    var polygon = new TiledPolygon();
+                    polygon.points = new float[vertices.Length * 2];
+
+                    for (var i = 0; i < vertices.Length; i++)
+                    {
+                        polygon.points[(i * 2) + 0] = float.Parse(vertices[i].Split(',')[0], CultureInfo.InvariantCulture);
+                        polygon.points[(i * 2) + 1] = float.Parse(vertices[i].Split(',')[1], CultureInfo.InvariantCulture);
+                    }
+
+                    obj.polygon = polygon;
+                }
+
+                if (nodeEllipse != null)
+                {
+                    obj.ellipse = new TiledEllipse();
+                }
+
+                if (nodePoint != null)
+                {
+                    obj.point = new TiledPoint();
+                }
+
+                if (node.Attributes["width"] != null)
+                {
+                    obj.width = float.Parse(node.Attributes["width"].Value, CultureInfo.InvariantCulture);
+                }
+
+                if (node.Attributes["height"] != null)
+                {
+                    obj.height = float.Parse(node.Attributes["height"].Value, CultureInfo.InvariantCulture);
+                }
+
+                if (node.Attributes["rotation"] != null)
+                {
+                    obj.rotation = int.Parse(node.Attributes["rotation"].Value);
+                }
+
+                result.Add(obj);
             }
 
             return result.ToArray();

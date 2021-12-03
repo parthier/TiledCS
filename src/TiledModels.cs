@@ -217,6 +217,10 @@ namespace TiledCS
         /// </summary>
         public TiledTileAnimation[] animation;
         /// <summary>
+        ///  An array of objects. Is null if none were defined.
+        /// </summary>
+        public TiledObject[] objects;
+        /// <summary>
         /// The individual tile image
         /// </summary>
         public TiledImage image;
